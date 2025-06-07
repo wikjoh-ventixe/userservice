@@ -16,7 +16,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSingleton(provider =>
 {
-    var channel = GrpcChannel.ForAddress("https://localhost:7078");
+    var channel = GrpcChannel.ForAddress(builder.Configuration.GetValue<string>("UserProfileServiceApi")!);
     return new GrpcUserProfile.GrpcUserProfileClient(channel);
 });
 
