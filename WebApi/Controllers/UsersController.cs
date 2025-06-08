@@ -19,7 +19,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(User))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateUserAsync(CreateUserRequestDto request)
+    public async Task<IActionResult> CreateUser(CreateUserRequestDto request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
