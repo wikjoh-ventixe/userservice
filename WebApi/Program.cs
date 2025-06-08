@@ -6,6 +6,7 @@ using Data.Entities;
 using Data.Interfaces;
 using Data.Repositories;
 using Grpc.Net.Client;
+using GrpcServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Protos;
@@ -19,6 +20,8 @@ builder.Services.AddSingleton(provider =>
     var channel = GrpcChannel.ForAddress(builder.Configuration.GetValue<string>("UserProfileServiceApi")!);
     return new GrpcUserProfile.GrpcUserProfileClient(channel);
 });
+
+builder.Services.AddGrpc();
 
 builder.Services.AddDbContext<UserDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 builder.Services.AddIdentity<UserEntity, IdentityRole>(x =>
@@ -42,6 +45,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapOpenApi();
+
+app.MapGrpcService<GrpcUserAuthService>();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -11,10 +11,11 @@ using System.Reflection;
 
 namespace Business.Services;
 
-public class UserService(UserManager<UserEntity> userManager, RoleManager<IdentityRole> roleManager, IUserRepository userRepository, GrpcUserProfile.GrpcUserProfileClient grpcUserProfileClient) : IUserService
+public class UserService(UserManager<UserEntity> userManager, RoleManager<IdentityRole> roleManager, IUserRepository userRepository, GrpcUserProfile.GrpcUserProfileClient grpcUserProfileClient, SignInManager<UserEntity> signInManager) : IUserService
 {
     private readonly UserManager<UserEntity> _userManager = userManager;
     private readonly RoleManager<IdentityRole> _roleManager = roleManager;
+    private readonly SignInManager<UserEntity> _signInManager = signInManager;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly GrpcUserProfile.GrpcUserProfileClient _grpcUserProfileClient = grpcUserProfileClient;
 
@@ -154,5 +155,26 @@ public class UserService(UserManager<UserEntity> userManager, RoleManager<Identi
             await _userRepository.RollbackTransactionAsync();
             return UserResult<User?>.InternalServerError($"Exception occurred in {MethodBase.GetCurrentMethod()!.Name}.");
         }
+    }
+
+
+    // READ
+    public async Task<UserResult<AuthData>> LoginUserAsync(UserLoginRequestDto request)
+    {
+        if (request == null)
+            return UserResult<AuthData>.BadRequest("Request cannot be null.");
+
+        var result = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, false);
+        if (result.Succeeded)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            return UserResult<AuthData>.Ok(new AuthData
+            {
+                UserId = user!.Id,
+                EmailConfirmed = user.EmailConfirmed,
+            });
+        }
+
+        return UserResult<AuthData>.Unauthorized("User authentication failed.");
     }
 }

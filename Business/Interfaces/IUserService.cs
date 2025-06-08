@@ -7,4 +7,5 @@ public interface IUserService
 {
     Task<UserResult<User?>> CreateUserAsync(CreateUserRequestDto request);
     Task<UserResult<User?>> CreateUserWithPasswordAsync(CreateUserRequestDto request, string password);
+    Task<UserResult<AuthData>> LoginUserAsync(UserLoginRequestDto request);
 }
